@@ -1,5 +1,5 @@
 function p =  init(p)
-%pds.datapixx.init    initialize Datapixx at the beginning of an experiment.
+%v    initialize Datapixx at the beginning of an experiment.
 % p =  pds.datapixx.init(p)
 %
 % pds.datapixx.init is a function that intializes the DATAPIXX, preparing it for
