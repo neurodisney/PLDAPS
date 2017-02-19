@@ -18,7 +18,7 @@ function p = runTrial(p)
     %ok, what are the options?
     %we'll make them states
     %is called once after the last frame is done (or even before)
-    %get current eyepostion, curser position or keypresses 
+    %get current eye position, cursor position or key presses
     p.trial.pldaps.trialStates.frameUpdate=1;
     %here you can prepare all drawing, e.g. have the dots move
     %if you need to update to the latest e.g. eyeposition
@@ -29,7 +29,7 @@ function p = runTrial(p)
     p.trial.pldaps.trialStates.frameDraw=3;
     %
     p.trial.pldaps.trialStates.frameIdlePreLastDraw=4;
-    %if there is something that needs updating. here is a fucntion to do it
+    %if there is something that needs updating. here is a function to do it
     %as late as possible
     p.trial.pldaps.trialStates.frameDrawTimecritical=5;
     %if this function is not used, drawingFinished will be called after
@@ -66,7 +66,7 @@ function p = runTrial(p)
     end
 
     %will be called just before the trial starts for time critical calls to
-    %start data aquisition
+    %start data acquisition
     tfh(p, p.trial.pldaps.trialStates.trialPrepare);
 
     p.trial.framePreLastDrawIdleCount=0;

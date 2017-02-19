@@ -1,7 +1,7 @@
 function p = setup(p)
 %pds.git.setup   retrieves and stores git info about relevant directories
 %
-% gets and eylink time estimate and send a TRIALSTART message to eyelink
+% gets and eyelink time estimate and send a TRIALSTART message to eyelink
 % sets up the git information about the used code.
 % at the moment this hold all changes of the PLDAPS and huklabBasics repo
 % should probably change to something more specific.

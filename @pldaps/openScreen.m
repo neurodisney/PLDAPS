@@ -1,6 +1,6 @@
 function p = openScreen(p)
 %openScreen    opens PsychImaging Window with preferences set for special
-%              decives like datapixx.
+%              devices like datapixx.
 %
 % required fields
 % p.defaultParameters.display.
@@ -215,7 +215,7 @@ elseif p.trial.display.useOverlay==2
     glUniform1i(glGetUniformLocation(p.trial.display.shader, 'Image'), 0);
     glUseProgram(0);
 
-    %% assign the overlay texture as the input 1 (which mapps to 'overlayImage' as set above)
+    %% assign the overlay texture as the input 1 (which maps to 'overlayImage' as set above)
     % It gets passed to the HookFunction call.
     % Input 0 is the main pointer by default.
     pString = sprintf('TEXTURERECT2D(1)=%i ', p.trial.display.overlaytex);

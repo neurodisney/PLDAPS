@@ -1,9 +1,9 @@
 classdef pldaps < handle
 %pldaps    main class for PLDAPS (Plexon Datapixx PsychToolbox) version 4.1
-% The pldaps contructor accepts the following inputs, all are optional, but may be required later for experiments to run:
+% The pldaps constructor accepts the following inputs, all are optional, but may be required later for experiments to run:
 %     1. a subject identifier (string)
-%     2. a function name or handle that sets up all experiement parameters
-%     3. a struct with changes to the defaultParameters, this is usefull for debugging, but could also be used to replace the function.
+%     2. a function name or handle that sets up all experiment parameters
+%     3. a struct with changes to the defaultParameters, this is useful for debugging, but could also be used to replace the function.
 % As long as the inputs are uniquely identifiable, the order is not important, otherwise 
 % for the remaining unclassified inputs the above order is assumed.
 % Read README.md for a more detailed explanation of the default usage
@@ -15,8 +15,8 @@ classdef pldaps < handle
     conditions@cell %cell array with a struct like defaultParameters that only hold condition specific changes or additions
 
     trial %will get all variables from defaultParameters + correct conditions cell merged. This will get saved automatically. 
-          %You can add calculated paraneters to this struct, e.g. the
-          %actual eyeposition used for caculating the frame, etc.
+          %You can add calculated parameters to this struct, e.g. the
+          %actual eyeposition used for calculating the frame, etc.
     data@cell
     
     functionHandles%@cell %mostly unused atm
@@ -24,7 +24,7 @@ classdef pldaps < handle
 
  methods
      function p = pldaps(varargin)
-        %classdefaults: create default struction from function
+        %classdefaults: create default structure from function
         defaults{1}=pldaps.pldapsClassDefaultParameters();
         defaultsNames{1}='pldapsClassDefaultParameters';
         
@@ -34,9 +34,9 @@ classdef pldaps < handle
         
         p.defaultParameters=params(defaults,defaultsNames);
         
-        %unnecassary, but we'll allow to save parameters in a rig
+        %unnecessary, but we'll allow to save parameters in a rig
         %struct, rather than the prefs, as that's a little more
-        %conveniant
+        %convenient
         if isField(p.defaultParameters,'pldaps.rigParameters')
             defaults{3}=load(p.defaultParameters.pldaps.rigParameters);
             fn=fieldnames(defaults{3});
@@ -56,7 +56,7 @@ classdef pldaps < handle
         
         %It's contents will overrule previous parameters
         %the first nonStruct is expected to be the subject's name
-        %the second nonStruct is expected to be the experiment functionname
+        %the second nonStruct is expected to be the experiment functio nname
         structIndex=cellfun(@isstruct,varargin);
         if any(structIndex)
             if sum(structIndex)>1
@@ -94,7 +94,7 @@ classdef pldaps < handle
         p.defaultParameters.addLevels({constructorStruct, struct},{'ConstructorInputDefaults', 'SessionParameters'});
         
         
-        %TODO: decice wheter this is a hack or feature. Allows to use
+        %TODO: decide whether this is a hack or feature. Allows to use
         %dv.trial before the first trial. But it's a Params class
         %until the first trial starts
         p.trial = p.defaultParameters; 

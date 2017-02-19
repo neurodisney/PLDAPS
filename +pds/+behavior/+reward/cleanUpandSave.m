@@ -4,7 +4,9 @@ function p = cleanUpandSave(p)
 % mostly a wrapper to the other modules. But also removes any unused fields
 % of p.trial.behavior.reward.timeReward
 
-    pds.newEraSyringePump.cleanUpandSave(p);
+    if(p.trial.newEraSyringePump.use)
+        pds.newEraSyringePump.cleanUpandSave(p);
+    end
     
     %nothing to do for other reward modes
     p.trial.behavior.reward.timeReward(isnan(p.trial.behavior.reward.timeReward))=[];

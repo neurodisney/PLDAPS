@@ -1,5 +1,5 @@
 function p = run(p)
-%run    run a new experiment for a previuously created pldaps class
+%run    run a new experiment for a previously created pldaps class
 % p = run(p)
 % PLDAPS (Plexon Datapixx PsychToolbox) version 4.1
 %       run is a wrapper for calling PLDAPS package files
@@ -7,17 +7,19 @@ function p = run(p)
 %           dual color lookup tables. 
 % 10/2011 jly wrote it (modified from letsgorun.m)
 % 12/2013 jly reboot. updated to version 3 format.
-% 04/2014 jk  moved into a pldaps class; adapated to new class structure
-
+% 04/2014 jk  moved into a pldaps class; adapted to new class structure
+%
+% modified by wolf zinke, Feb. 2017: cleaned for unused hardware options
+%
 %TODO: 
 % one unified system for modules, e.g. moduleSetup, moduleUpdate, moduleClose
 % make HideCursor optional
-% TODO:reset class at end of experiment or mark as recorded, so I don't
+% TODO: reset class at end of experiment or mark as recorded, so I don't
 % run the same again by mistake
 
 try
     %% Setup and File management
-    % Enure we have an experimentSetupFile set and verify output file
+    % Ensure we have an experimentSetupFile set and verify output file
     
     %make sure we are not running an experiment twice
     if isField(p.defaultParameters, 'session.initTime')
@@ -63,7 +65,7 @@ try
     end
 
     if p.trial.pldaps.useModularStateFunctions
-        %experimentSetup before openScreen to allow modifyiers
+        %experimentSetup before openScreen to allow modifiers
         [modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs] = getModules(p);
         runStateforModules(p,'experimentPreOpenScreen',modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
     end
@@ -89,41 +91,44 @@ try
                 p = initTicks(p);
             end
 
-
             %get and store changes of current code to the git repository
             p = pds.git.setup(p);
             
             %things that were in the conditionFile
-            p = pds.eyelink.setup(p);
-    
+            if(p.trial.eyelink.use)
+                p = pds.eyelink.setup(p);
+            end
+
             %things that where in the default Trial Structure
             
             % Audio
             %-------------------------------------------------------------------------%
-            p = pds.audio.setup(p);
-            
+            if(p.trial.sound.use)
+                p = pds.audio.setup(p);
+            end
             % PLEXON
             %-------------------------------------------------------------------------%
-            p = pds.plexon.spikeserver.connect(p);
-            
+            if(p.trial.plexon.spikeserver.use)
+                p = pds.plexon.spikeserver.connect(p);
+            end
+
             % REWARD
             %-------------------------------------------------------------------------%
             p = pds.behavior.reward.setup(p);
                      
-            % Initialize Datapixx including dual CLUTS and timestamp
-            % logging
+            % Initialize Datapixx including dual CLUTS and timestamp logging
             p = pds.datapixx.init(p);
             
             pds.keyboard.setup(p);
 
-            if p.trial.mouse.useLocalCoordinates
+            if(p.trial.mouse.useLocalCoordinates)
                 p.trial.mouse.windowPtr=p.trial.display.ptr;
             end
-            if ~isempty(p.trial.mouse.initialCoordinates)
+            if(~isempty(p.trial.mouse.initialCoordinates))
                 SetMouse(p.trial.mouse.initialCoordinates(1),p.trial.mouse.initialCoordinates(2),p.trial.mouse.windowPtr)
             end
     
-            if p.trial.pldaps.useModularStateFunctions
+            if(p.trial.pldaps.useModularStateFunctions)
                 [modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs] = getModules(p);
                 runStateforModules(p,'experimentPostOpenScreen',modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
             end
@@ -193,7 +198,7 @@ try
            %it looks like the trial struct gets really partitioned in
            %memory and this appears to make some get (!) calls slow. 
            %We thus need a deep copy. The superclass matlab.mixin.Copyable
-           %is supposed to do that, but that is ver very slow, so we create 
+           %is supposed to do that, but that is very slow, so we create
            %a manual deep copy by saving the struct to a file and loading it 
            %back in.
            tmpts=mergeToSingleStruct(p.defaultParameters);
@@ -274,7 +279,7 @@ try
             
         else %dbquit ==1 is meant to be pause. should we halt eyelink, datapixx, etc?
             %create a new level to store all changes in, 
-            %load only non trial paraeters
+            %load only non trial parameters
             pause=p.trial.pldaps.pause.type;
             p.trial=p.defaultParameters;
             
@@ -297,7 +302,7 @@ try
 
             %now I'm assuming that nobody created new levels,
             %but I guess when you know how to do that
-            %you should also now how to not skrew things up
+            %you should also now how to not screw things up
             allStructs=p.defaultParameters.getAllStructs();
             if(~isequal(struct,allStructs{end}))
                 levelsPreTrials=[levelsPreTrials length(allStructs)]; %#ok<AGROW>
@@ -398,7 +403,7 @@ function pauseLoop(dv)
         ShowCursor;
         ListenChar(1);
         while(true)
-            %the keyboard chechking we only capture ctrl+alt key presses.
+            %the keyboard checking we only capture ctrl+alt key presses.
             [dv.trial.keyboard.pressedQ,  dv.trial.keyboard.firstPressQ]=KbQueueCheck(); % fast
             if dv.trial.keyboard.firstPressQ(dv.trial.keyboard.codes.Lctrl)&&dv.trial.keyboard.firstPressQ(dv.trial.keyboard.codes.Lalt)
                 %D: Debugger

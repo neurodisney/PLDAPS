@@ -24,7 +24,7 @@ p.defaultParameters.(stimulusname).randomNumberGenerater = 'mt19937ar';
 
 % Setup Timings
 %-------------------------------------------------------------------------%
-% Reward time: is time that solenoid is opened for. set to 100 miliseconds
+% Reward time: is time that solenoid is opened for. set to 100 milliseconds
 % for mapping trials.
 p.defaultParameters.(stimulusname).rewardTime = .1;
 p.defaultParameters.(stimulusname).rewardWait = 0;
@@ -44,7 +44,7 @@ p.defaultParameters.(stimulusname).targDuration = [2 .2];
 % Colors
 %-------------------------------------------------------------------------%
 p = defaultColors(p);
-
+%
 % Bits
 %-------------------------------------------------------------------------%
 p = defaultBitNames(p);

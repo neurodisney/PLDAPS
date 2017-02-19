@@ -16,7 +16,7 @@ function p = initTicks(p)
 % OUTPUTS:
 %   p [class]
 %     .trial [struct] - main variables structure (modified)
-%       .display   - display stucture  (modified)
+%       .display   - display structure  (modified)
 %         .draw
 %           .grid
 %             .tick_line_matrix - field added in format called by
@@ -25,7 +25,7 @@ function p = initTicks(p)
 % 
 % 2011?      kme Wrote it
 % 2013?      lnk Cave_samsung addendum added by ktz, 2013. rest is untouched.
-%                (added more vairables to the d2p function call and increased 
+%                (added more variables to the d2p function call and increased
 %                number of ticks)
 % 12/12/2013 jly Updated help text and robustified screensize calculation
 % 05/30/2014 jk  couple of changes:
