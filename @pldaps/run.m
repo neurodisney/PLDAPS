@@ -94,17 +94,23 @@ try
             p = pds.git.setup(p);
             
             %things that were in the conditionFile
-            p = pds.eyelink.setup(p);
-    
+            if(p.trial.eyelink.use)
+                p = pds.eyelink.setup(p);
+            end
+            
             %things that where in the default Trial Structure
             
             % Audio
             %-------------------------------------------------------------------------%
-            p = pds.audio.setup(p);
+            if(p.trial.sound.use)
+                p = pds.audio.setup(p);
+            end
             
             % PLEXON
             %-------------------------------------------------------------------------%
-            p = pds.plexon.spikeserver.connect(p);
+            if(p.trial.plexon.spikeserver.use)
+                p = pds.plexon.spikeserver.connect(p);
+            end
             
             % REWARD
             %-------------------------------------------------------------------------%
@@ -116,14 +122,15 @@ try
             
             pds.keyboard.setup(p);
 
-            if p.trial.mouse.useLocalCoordinates
+            if(p.trial.mouse.useLocalCoordinates)
                 p.trial.mouse.windowPtr=p.trial.display.ptr;
             end
-            if ~isempty(p.trial.mouse.initialCoordinates)
+            
+            if(~isempty(p.trial.mouse.initialCoordinates))
                 SetMouse(p.trial.mouse.initialCoordinates(1),p.trial.mouse.initialCoordinates(2),p.trial.mouse.windowPtr)
             end
     
-            if p.trial.pldaps.useModularStateFunctions
+            if(p.trial.pldaps.useModularStateFunctions)
                 [modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs] = getModules(p);
                 runStateforModules(p,'experimentPostOpenScreen',modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
             end
