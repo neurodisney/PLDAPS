@@ -73,7 +73,7 @@ try
     p = openScreen(p);
     
     % Setup PLDAPS experiment condition
-    p.defaultParameters.pldaps.maxFrames=p.defaultParameters.pldaps.maxTrialLength*p.defaultParameters.display.frate;
+    p.defaultParameters.pldaps.maxFrames = p.defaultParameters.pldaps.maxTrialLength * p.defaultParameters.display.frate;
     feval(p.defaultParameters.session.experimentSetupFile, p);
     
     %
