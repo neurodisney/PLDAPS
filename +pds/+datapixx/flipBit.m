@@ -7,7 +7,6 @@ function timings = flipBit(evnt)
 % based on the original pldaps code by jk (2015)
 % wolf zinke, Feb 2017
 
-
 if(nargout == 0)
     pds.tdt.strobe(evnt);
 else
