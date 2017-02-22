@@ -1,7 +1,7 @@
 function timings=strobe(lowWord,highWord)
-%pds.datapixx.strobe    strobes a 16 Bit word from the datapixx
+%pds.plexon.strobe    strobes a 16 Bit word from the datapixx
 %
-% pds.datapixx.strobe(lowWord,highWord) 
+% pds.plexon.strobe(lowWord,highWord) 
 %
 % strobes two 8-bit words (255) from the datapixx
 % INPUTS
