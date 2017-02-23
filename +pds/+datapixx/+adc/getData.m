@@ -9,7 +9,7 @@ function p = getData(p)
 %     jk  reqrote  2014 to use new parameter structure and add flexibilty
 %                       and proper tracking of sample times
 
-if ~p.trial.datapixx.use || isempty(p.trial.datapixx.adc.channels)
+if(~p.trial.datapixx.use || isempty(p.trial.datapixx.adc.channels))
     return;
 end
 
@@ -43,32 +43,3 @@ for imap=1:nMaps
     
     p=subsasgn(p,iSub,bufferData(p.trial.datapixx.adc.channelMappingChannelInds{imap},:));
 end
-
-%  %add eye
-%  if p.trial.datapixx.useAsEyepos
-%      if ~isempty(p.trial.datapixx.adc.XEyeposChannelSubs)
-%          iSub=p.trial.datapixx.adc.XEyeposChannelSubs;
-%          if p.trial.pldaps.eyeposMovAv>1
-%              dInds=(p.trial.datapixx.adc.dataSampleCount-p.trial.pldaps.eyeposMovAv+1):p.trial.datapixx.adc.dataSampleCount;
-%              iSub(end).subs{2}=dInds;
-%              p.trial.eyeX = mean(subsref(p,iSub));
-%          else
-%              dInds=p.trial.datapixx.adc.dataSampleCount;
-%              iSub(end).subs{2}=dInds;
-%              p.trial.eyeX = subsref(p,iSub);
-%          end
-%      end
-%      if ~isempty(p.trial.datapixx.adc.YEyeposChannelSubs)
-%          iSub=p.trial.datapixx.adc.YEyeposChannelSubs;
-%
-%          if p.trial.pldaps.eyeposMovAv>1
-%              dInds=(p.trial.datapixx.adc.dataSampleCount-p.trial.pldaps.eyeposMovAv+1):p.trial.datapixx.adc.dataSampleCount;
-%              iSub(end).subs{2}=dInds;
-%              p.trial.eyeY = mean(subsref(p,iSub));
-%          else
-%              dInds=p.trial.datapixx.adc.dataSampleCount;
-%              iSub(end).subs{2}=dInds;
-%              p.trial.eyeY = subsref(p,iSub);
-%          end
-%      end
-%  end

@@ -103,7 +103,7 @@ if p.trial.display.useOverlay==1 % Datapixx overlay
         disp('****************************************************************')
         disp('Adding Overlay Pointer')
         disp('Combining color look up tables that can be found in')
-        disp('dv.disp.humanCLUT and dv.disp.monkeyCLUT')
+        disp('p.disp.humanCLUT and p.disp.monkeyCLUT')
         disp('****************************************************************')
         
         %check if transparant color is availiable? but how? firmware versions

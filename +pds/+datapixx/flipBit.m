@@ -9,7 +9,7 @@ function timings = flipBit(evnt)
 
 
 if(nargout == 0)
-    pds.tdt.strobe(evnt));
+    pds.tdt.strobe(evnt);
 else
     timings = pds.tdt.strobe(evnt);
 end

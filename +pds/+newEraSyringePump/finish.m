@@ -7,6 +7,6 @@ function p = finish(p)
 %
 % jk wrote it 2015
 
-if p.trial.newEraSyringePump.use
+if(p.trial.newEraSyringePump.use)
     IOPort('close',p.trial.newEraSyringePump.h)
 end
