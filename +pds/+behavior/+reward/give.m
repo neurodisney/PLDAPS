@@ -22,8 +22,9 @@ function p = give(p, amount)
     end
 
     % send event code for reward    
-    pds.datapixx.flipBit(p.trial.event.REWARD);
-
+%pds.datapixx.flipBit(p.trial.event.REWARD);
+   pds.tdt.strobe(p.trial.event.REWARD);
+   
     %%sound
     if(p.trial.sound.use && p.trial.sound.useForReward)
         PsychPortAudio('Start', p.trial.sound.reward);

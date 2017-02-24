@@ -70,6 +70,8 @@ end
 Datapixx('SetDoutValues', 0, chanmask);
 Datapixx('RegWr');
 
-
-
+% send event code for active digital output channel
+% for(i=1:length(chan))
+%     pds.datapixx.flipBit(p.trial.event.(['DO_',int2str(chan(i))]));
+% end
 

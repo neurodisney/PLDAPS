@@ -39,7 +39,7 @@ if(nargout == 0)
     Datapixx('RegWr');
     
 else
-% get time stamp back, might impair performance
+    % get time stamp back, might impair performance
     t = nan(2,1);
 
     oldPriority = Priority;

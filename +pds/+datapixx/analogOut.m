@@ -15,6 +15,7 @@ function analogOut(open_time, chan, TTLamp)
 % modified by JLY 2012 - replaced if~exist with nargin calls for speedup
 % modified by JK  2014 - slight adjustments for use with version 4.1
 % modified by wolf zinke, Feb. 2017 - put reward defaults into pds.behavior.reward.give
+%                                   - encode events when analog channel is  used
 
 
 DOUTchannel = chan; % channel -- you have to map your breakout board
@@ -30,5 +31,8 @@ Datapixx('WriteDacBuffer', bufferData ,0 ,DOUTchannel);
 Datapixx('SetDacSchedule', 0, sampleRate, maxFrames ,DOUTchannel);
 Datapixx StartDacSchedule;
 Datapixx RegWrRd;
+
+% pds.datapixx.flipBit(p.trial.event.(['AO_',int2str(chan)]));
+
 
 

@@ -292,9 +292,4 @@ if p.trial.display.forceLinearGamma %does't really belong here, but need it befo
     LoadIdentityClut(p.trial.display.ptr);
 end
 
-<<<<<<< HEAD
-% p=defaultColors(p); % load the default CLUTs -- this is useful for opening overlay window in pds.datapixx.init
-=======
-
->>>>>>> 62f307e349005153be17abfd4a7a9e9b9ff2c9dc
 p.trial.display.t0 = Screen('Flip', p.trial.display.ptr);
