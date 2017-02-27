@@ -21,8 +21,7 @@ function p = give(p, amount)
         pds.newEraSyringePump.give(p,amount);
     end
 
-    % send event code for reward    
-%pds.datapixx.flipBit(p.trial.event.REWARD);
+   % send event code for reward    
    pds.tdt.strobe(p.trial.event.REWARD);
    
     %%sound

@@ -1,4 +1,4 @@
-function analogOut(open_time, chan, TTLamp) 
+function analogOut(open_time, chan, TTLamp, sampleRate) 
 % pds.datapixx.analogOut    Send a TTL pulse through the Analog Out
 % Send a [TTLamp] volt signal out the channel [chan], for [open_time] seconds
 % 
@@ -15,16 +15,15 @@ function analogOut(open_time, chan, TTLamp)
 % modified by JLY 2012 - replaced if~exist with nargin calls for speedup
 % modified by JK  2014 - slight adjustments for use with version 4.1
 % modified by wolf zinke, Feb. 2017 - put reward defaults into pds.behavior.reward.give
-%                                   - encode events when analog channel is  used
+%                                   - encode events when analog channel is used
 
 
 DOUTchannel = chan; % channel -- you have to map your breakout board
 
-sampleRate = 1000; % Hz MAGIC NUMBER??
+sampleRate = 1000; % Hz MAGIC NUMBER??  WZ: This has to be equal to p.trial.datapixx.adc.dataSampleTimes.srate
 
-
-bufferData = [TTLamp*ones(1,round(open_time*sampleRate)) 0] ;
-maxFrames = length(bufferData);
+bufferData = [TTLamp*ones(1,round(open_time*sampleRate)), 0] ;
+maxFrames  = length(bufferData);
 
 Datapixx('WriteDacBuffer', bufferData ,0 ,DOUTchannel);
 

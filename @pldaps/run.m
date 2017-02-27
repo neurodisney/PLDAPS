@@ -41,8 +41,8 @@ try
         p.defaultParameters.session.experimentSetupFile = cfile;
     end
     
-    if ~p.defaultParameters.pldaps.nosave
-        p.defaultParameters.session.dir = p.defaultParameters.pldaps.dirs.data;
+    if(~p.defaultParameters.pldaps.nosave)
+        p.defaultParameters.session.dir  = p.defaultParameters.pldaps.dirs.data;
         p.defaultParameters.session.file = [p.defaultParameters.session.subject datestr(p.defaultParameters.session.initTime, 'yyyymmdd') p.defaultParameters.session.experimentSetupFile datestr(p.defaultParameters.session.initTime, 'HHMM') '.PDS'];
         %         p.defaultParameters.session.file = fullfile(p.defaultParameters.pldaps.dirs.data, [p.defaultParameters.session.subject datestr(p.defaultParameters.session.initTime, 'yyyymmdd') p.defaultParameters.session.experimentSetupFile datestr(p.defaultParameters.session.initTime, 'HHMM') '.PDS']);
         
@@ -51,7 +51,7 @@ try
             if(isnumeric(cfile)) %got canceled
                 error('pldaps:run','file selection canceled. Not sure what the correct default bevaior would be, so stopping the experiment.')
             end
-            p.defaultParameters.session.dir = cdir;
+            p.defaultParameters.session.dir  = cdir;
             p.defaultParameters.session.file = cfile;
         end
         

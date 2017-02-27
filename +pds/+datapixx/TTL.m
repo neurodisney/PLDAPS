@@ -1,4 +1,4 @@
-function timings = TTL(chan, EV)
+function timings = TTL(chan, EV, dur)
 % pds.datapix.TTL    sends a TTL pulse over one of the last 8 bits of the digital output
 % of the DataPixx DB25 connector. If a event code is provided as second 
 % argument an additional code is sent via the first 16 bits (check  
@@ -18,12 +18,12 @@ function timings = TTL(chan, EV)
 % wolf zinke & Kia Banaie, Feb 2017
 
 %% generate a mask covering the 16 bits used for TDT communication
+evntmask = '0000000000000000'; % hardcode for efficiency %repmat('0',1,16);
 if(nargin > 1)
+    if(~isempty(EV))
     % encode an event code
-    evntmask = dec2bin(EV, 16);
-else
-    % nothing to say
-    evntmask = '0000000000000000'; % hardcode for efficiency %repmat('0',1,16);
+        evntmask = dec2bin(EV, 16);
+    end
 end
 
 %% select channels for the DIO TTL pulse
@@ -64,7 +64,13 @@ else
     timings = [mean(t), dpTime, diff(t)];
 end
 
-%pause(0.1);
+if(nargin > 2)
+% a minimal time delay might be required to be detected by the TDT system:
+% check the sampling rate of the RZ unit.
+    if(~isempty(dur))
+        WaitSecs(dur); 
+    end
+end
 
 %% reset channels to low again
 Datapixx('SetDoutValues', 0, chanmask);

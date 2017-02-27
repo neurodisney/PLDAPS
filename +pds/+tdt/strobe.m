@@ -1,4 +1,4 @@
-function timings = strobe(EV)
+function timings = strobe(EV, dur)
 % pds.tdt.strobe   strobes 16 bit integer event marker to the Tucker Davis system.
 %
 % This function is a modification of the pds.datapixx.strobe function included in PLDAPS
@@ -37,7 +37,6 @@ if(nargout == 0)
     % just send event one-way for efficiency 
     Datapixx('SetDoutValues', EV, TwoByte);
     Datapixx('RegWr');
-    
 else
     % get time stamp back, might impair performance
     t = nan(2,1);
@@ -62,6 +61,14 @@ else
     end
 
     timings = [mean(t), dpTime, diff(t)];
+end
+
+if(nargin > 1)
+% a minimal time delay might be required to be detected by the TDT system:
+% check the sampling rate of the RZ unit.
+    if(~isempty(dur))
+        WaitSecs(dur); 
+    end
 end
 
 % need to reset, otherwise if the same event follows it will not be captured
