@@ -193,12 +193,12 @@ try
             else
                 p.defaultParameters.setLevels([levelsPreTrials]);
             end
-            p.defaultParameters.pldaps.iTrial=trialNr;
+            p.defaultParameters.pldaps.iTrial = trialNr;
             
             %it looks like the trial struct gets really partitioned in
             %memory and this appears to make some get (!) calls slow.
             %We thus need a deep copy. The superclass matlab.mixin.Copyable
-            %is supposed to do that, but that is ver very slow, so we create
+            %is supposed to do that, but that is very slow, so we create
             %a manual deep copy by saving the struct to a file and loading it
             %back in.
             tmpts=mergeToSingleStruct(p.defaultParameters);
