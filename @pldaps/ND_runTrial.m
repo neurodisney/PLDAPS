@@ -5,48 +5,15 @@ function p = ND_runTrial(p)
 % 03/2013 jly   Wrote hyperflow
 % 03/2014 jk    Used jly's code to get the PLDAPS structure and frame it into a class
 %               might change to ASYNC buffer flipping. but won't for now.
+%
 % 02/2017 wolf zinke started cleaning up for neurodisney purposes
 
     %the trialFunctionHandle
     tfh = str2func(p.trial.pldaps.trialFunction);
     
-    % trial states that are not in a frame are negative, just to allow both to be more independent
-    p.trial.pldaps.trialStates.trialSetup=-1;
-    p.trial.pldaps.trialStates.trialPrepare=-2;
-    p.trial.pldaps.trialStates.trialCleanUpandSave=-3;
-    
-    %ok, what are the options?
-    %we'll make them states
-    %is called once after the last frame is done (or even before)
-    %get current eye position, cursor position or key presses
-    p.trial.pldaps.trialStates.frameUpdate=1;
-    %here you can prepare all drawing, e.g. have the dots move
-    %if you need to update to the latest e.g. eyeposition
-    %you can still do that later, this could be all expected heavy
-    %calculations
-    p.trial.pldaps.trialStates.framePrepareDrawing=2; 
-    %once you know you've calculated the final image, draw it
-    p.trial.pldaps.trialStates.frameDraw=3;
-    %
-    p.trial.pldaps.trialStates.frameIdlePreLastDraw=4;
-    %if there is something that needs updating. here is a function to do it
-    %as late as possible
-    p.trial.pldaps.trialStates.frameDrawTimecritical=5;
-    %if this function is not used, drawingFinished will be called after
-    %frameDraw is done, otherwise drawingFinished will not be called
-    p.trial.pldaps.trialStates.frameDrawingFinished=6;
-
-    %this function gets called once everything got drawn, until it's time
-    %to expect (and do) the flip
-    p.trial.pldaps.trialStates.frameIdlePostDraw=7;
-    %do the flip (or when async) record the time 
-    p.trial.pldaps.trialStates.frameFlip=8;
-    
-    p.trial.currentFrameState=1;    
-    
     tfh(p, p.trial.pldaps.trialStates.trialSetup);
     
-    %switch to high priority mode
+    % switch to high priority mode
     if(p.trial.pldaps.maxPriority)
         oldPriority = Priority;
         maxPriority = MaxPriority('GetSecs');
@@ -60,31 +27,40 @@ function p = ND_runTrial(p)
 
     %%% MAIN WHILE LOOP %%%
     %-------------------------------------------------------------------------%
-    while ~p.trial.flagNextTrial && p.trial.pldaps.quit == 0
+    while(~p.trial.flagNextTrial && ~p.trial.pldaps.quit)
         %g o through one frame by calling tfh with the different states.
         % Save the times each state is finished.
 
         %time of the estimated next flip
         p.trial.nextFrameTime = p.trial.stimulus.timeLastFrame + p.trial.display.ifi;
 
+        % Frame Update
+        if(p.trial.pldaps.GetTrialStateTimes)
+            setTimeAndFrameState(p,p.trial.pldaps.trialStates.frameUpdate);  
+        end
         tfh(p, p.trial.pldaps.trialStates.frameUpdate);
         
-        setTimeAndFrameState(p,p.trial.pldaps.trialStates.framePrepareDrawing)
+        % Frame Prepare Drawing
+        if(p.trial.pldaps.GetTrialStateTimes)
+            setTimeAndFrameState(p,p.trial.pldaps.trialStates.framePrepareDrawing)
+        end
         tfh(p, p.trial.pldaps.trialStates.framePrepareDrawing);
         
-        setTimeAndFrameState(p,p.trial.pldaps.trialStates.frameDraw);
+        % Frame Draw
+        if(p.trial.pldaps.GetTrialStateTimes)
+            setTimeAndFrameState(p,p.trial.pldaps.trialStates.frameDraw);
+        end
         tfh(p, p.trial.pldaps.trialStates.frameDraw);
 
-        setTimeAndFrameState(p,p.trial.pldaps.trialStates.frameDrawingFinished);
-        tfh(p, p.trial.pldaps.trialStates.frameDrawingFinished);
-
-        setTimeAndFrameState(p,p.trial.pldaps.trialStates.frameFlip)
+        % Frame Flip
+        if(p.trial.pldaps.GetTrialStateTimes)
+            setTimeAndFrameState(p,p.trial.pldaps.trialStates.frameFlip)
+        end
         tfh(p, p.trial.pldaps.trialStates.frameFlip);
         
-        %advance to next frame
-        setTimeAndFrameState(p,p.trial.pldaps.trialStates.frameUpdate);  
-        
+        %advance to next frame        
         p.trial.iFrame = p.trial.iFrame + 1;  % update frame index
+        
     end %while Trial running
 
     if p.trial.pldaps.maxPriority
@@ -104,7 +80,6 @@ end %runTrial
 function setTimeAndFrameState(p, state)
         p.trial.ttime = GetSecs - p.trial.trstart;
         p.trial.remainingFrameTime = p.trial.nextFrameTime - p.trial.ttime;
-        p.trial.timing.frameStateChangeTimes(p.trial.currentFrameState, p.trial.iFrame) = ...
+        p.trial.timing.frameStateChangeTimes(state, p.trial.iFrame) = ...
                            p.trial.ttime - p.trial.nextFrameTime + p.trial.display.ifi;
-        p.trial.currentFrameState = state;        
 end

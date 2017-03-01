@@ -9,7 +9,8 @@ function p = run(p)
 % 12/2013 jly reboot. updated to version 3 format.
 % 04/2014 jk  moved into a pldaps class; adapted to new class structure
 %
-% modified by wolf zinke, Feb. 2017: cleaned for unused hardware options
+% modified by wolf zinke, Feb. 2017: cleaned for unused hardware options,
+%                                    change data file name definition
 %
 %TODO: 
 % one unified system for modules, e.g. moduleSetup, moduleUpdate, moduleClose
@@ -41,13 +42,23 @@ try
         p.defaultParameters.session.experimentSetupFile = cfile;
     end
     
+    % WZ: define output directory
+    p.defaultParameters.pldaps.dirs.data = fullfile(p.defaultParameters.pldaps.dirs.data, ...
+                                            p.defaultParameters.session.subject, ...
+                                            p.defaultParameters.session.experimentSetupFile, datestr(now,'yyyy_mm_dd'));
+   
     if(~p.defaultParameters.pldaps.nosave)
+        
         p.defaultParameters.session.dir  = p.defaultParameters.pldaps.dirs.data;
-        p.defaultParameters.session.file = [p.defaultParameters.session.subject datestr(p.defaultParameters.session.initTime, 'yyyymmdd') p.defaultParameters.session.experimentSetupFile datestr(p.defaultParameters.session.initTime, 'HHMM') '.PDS'];
+        
+        p.defaultParameters.session.file = [p.defaultParameters.session.subject, '_', datestr(p.defaultParameters.session.initTime, 'yyyymmdd'), ...
+                                           p.defaultParameters.session.experimentSetupFile, '_', datestr(p.defaultParameters.session.initTime, 'HHMM') '.pds'];
+        
+        %p.defaultParameters.session.file = [p.defaultParameters.session.subject datestr(p.defaultParameters.session.initTime, 'yyyymmdd') p.defaultParameters.session.experimentSetupFile datestr(p.defaultParameters.session.initTime, 'HHMM') '.PDS'];
         %         p.defaultParameters.session.file = fullfile(p.defaultParameters.pldaps.dirs.data, [p.defaultParameters.session.subject datestr(p.defaultParameters.session.initTime, 'yyyymmdd') p.defaultParameters.session.experimentSetupFile datestr(p.defaultParameters.session.initTime, 'HHMM') '.PDS']);
         
         if p.defaultParameters.pldaps.useFileGUI
-            [cfile, cdir] = uiputfile('.PDS', 'specify data storage file', fullfile( p.defaultParameters.session.dir,  p.defaultParameters.session.file));
+            [cfile, cdir] = uiputfile('.pds', 'specify data storage file', fullfile( p.defaultParameters.session.dir,  p.defaultParameters.session.file));
             if(isnumeric(cfile)) %got canceled
                 error('pldaps:run','file selection canceled. Not sure what the correct default bevaior would be, so stopping the experiment.')
             end
@@ -78,7 +89,6 @@ try
     p.defaultParameters.pldaps.maxFrames = p.defaultParameters.pldaps.maxTrialLength * p.defaultParameters.display.frate;
     feval(p.defaultParameters.session.experimentSetupFile, p);
     
-    %
     % Setup Photodiode stimuli
     %-------------------------------------------------------------------------%
     if(p.trial.pldaps.draw.photodiode.use)
@@ -91,7 +101,6 @@ try
         p = initTicks(p);
     end
     
-    
     %get and store changes of current code to the git repository
     p = pds.git.setup(p);
     
@@ -99,7 +108,6 @@ try
     if(p.trial.eyelink.use)
         p = pds.eyelink.setup(p);
     end
-    
     %things that where in the default Trial Structure
     
     % Audio
@@ -152,14 +160,16 @@ try
     HideCursor
     
     p.trial.flagNextTrial  = 0; % flag for ending the trial
-    p.trial.iFrame     = 1;  % frame index
+    p.trial.iFrame         = 1; % frame index
     
     %save defaultParameters as trial 0
-    trialNr=0;
+    trialNr = 0;
+    
     p.trial.pldaps.iTrial=0;
-    p.trial=mergeToSingleStruct(p.defaultParameters);
+    p.trial = mergeToSingleStruct(p.defaultParameters);
     result = saveTempFile(p);
-    if ~isempty(result)
+    
+    if(~isempty(result))
         disp(result.message)
     end
     
@@ -169,7 +179,7 @@ try
     
     %we'll have a trialNr counter that the trial function can tamper with?
     %do we need to lock the defaultParameters to prevent tampering there?
-    levelsPreTrials=p.defaultParameters.getAllLevels();
+    levelsPreTrials = p.defaultParameters.getAllLevels();
     %     dv.defaultParameters.addLevels(dv.conditions(trialNr), {['Trial' num2str(trialNr) 'Parameters']});
     
     %for now all structs will be in the parameters class, first
@@ -181,18 +191,20 @@ try
     %only use dv.trial from here on!
     
     %% main trial loop %%
-    while p.trial.pldaps.iTrial < p.trial.pldaps.finish && p.trial.pldaps.quit~=2
+    while(p.trial.pldaps.iTrial < p.trial.pldaps.finish && p.trial.pldaps.quit ~= 2)
         
-        if p.trial.pldaps.quit == 0
+        if(~p.trial.pldaps.quit)
             
             %load parameters for next trial and lock defaultsParameters
-            trialNr=trialNr+1;
-            if ~isempty(p.conditions)
-                p.defaultParameters.addLevels(p.conditions(trialNr), {['Trial' num2str(trialNr) 'Parameters']});
-                p.defaultParameters.setLevels([levelsPreTrials length(levelsPreTrials)+trialNr]);
+            trialNr = trialNr+1;
+            
+            if(~isempty(p.conditions))
+                p.defaultParameters.addLevels(p.conditions(trialNr), {['Trial', num2str(trialNr), 'Parameters']});
+                p.defaultParameters.setLevels([levelsPreTrials, length(levelsPreTrials)+trialNr]);
             else
-                p.defaultParameters.setLevels([levelsPreTrials]);
+                p.defaultParameters.setLevels(levelsPreTrials);
             end
+            
             p.defaultParameters.pldaps.iTrial = trialNr;
             
             %it looks like the trial struct gets really partitioned in
@@ -201,14 +213,13 @@ try
             %is supposed to do that, but that is very slow, so we create
             %a manual deep copy by saving the struct to a file and loading it
             %back in.
-            tmpts=mergeToSingleStruct(p.defaultParameters);
-            save([p.trial.pldaps.dirs.data filesep 'TEMP' filesep 'deepTrialStruct'], 'tmpts');
+            tmpts = mergeToSingleStruct(p.defaultParameters);
+            save([p.trial.pldaps.dirs.data, filesep, 'TEMP', filesep, 'deepTrialStruct'], 'tmpts');
             clear tmpts
-            load([p.trial.pldaps.dirs.data filesep 'TEMP' filesep 'deepTrialStruct']);
-            p.trial=tmpts;
+            load([p.trial.pldaps.dirs.data, filesep, 'TEMP', filesep, 'deepTrialStruct']);
+            p.trial = tmpts;
             clear tmpts;
             %             p.trial=mergeToSingleStruct(p.defaultParameters);
-            
             
             p.defaultParameters.setLock(true);
             
@@ -229,14 +240,15 @@ try
                 dTrialStruct = p.trial;
             else
                 %store the difference of the trial struct to .data
-                dTrialStruct=getDifferenceFromStruct(p.defaultParameters,p.trial);
+                dTrialStruct = getDifferenceFromStruct(p.defaultParameters, p.trial);
             end
             p.data{trialNr}=dTrialStruct;
-            
-            
-            if p.trial.pldaps.useModularStateFunctions
-                oldptrial=p.trial;
+                       
+            if(p.trial.pldaps.useModularStateFunctions)
+                oldptrial = p.trial;
+                
                 [modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs] = getModules(p);
+                
                 p.defaultParameters.setLevels(levelsPreTrials);
                 p.defaultParameters.pldaps.iTrial=trialNr;
                 p.trial=mergeToSingleStruct(p.defaultParameters);
@@ -245,10 +257,11 @@ try
                 runStateforModules(p,'experimentAfterTrials',modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
                 
                 p.defaultParameters.setLock(false);
-                betweenTrialsStruct=getDifferenceFromStruct(p.defaultParameters,p.trial);
+                betweenTrialsStruct = getDifferenceFromStruct(p.defaultParameters, p.trial);
+                
                 if(~isequal(struct,betweenTrialsStruct))
                     p.defaultParameters.addLevels({betweenTrialsStruct}, {['experimentAfterTrials' num2str(trialNr) 'Parameters']});
-                    levelsPreTrials=[levelsPreTrials length(p.defaultParameters.getAllLevels())]; %#ok<AGROW>
+                    levelsPreTrials = [levelsPreTrials, length(p.defaultParameters.getAllLevels())]; %#ok<AGROW>
                 end
                 
                 p.trial=oldptrial;
@@ -308,9 +321,9 @@ try
             if(~isequal(struct,allStructs{end}))
                 levelsPreTrials=[levelsPreTrials length(allStructs)]; %#ok<AGROW>
             end
-        end
-        
-    end
+            
+        end  %  if(~p.trial.pldaps.quit)
+    end  %  while(p.trial.pldaps.iTrial < p.trial.pldaps.finish && p.trial.pldaps.quit ~= 2)
     
     %make the session parameterStruct active
     p.defaultParameters.setLevels(levelsPreTrials);
@@ -321,8 +334,14 @@ try
     ListenChar(0);
     Priority(0);
     
-    p = pds.eyelink.finish(p);
-    p = pds.plexon.finish(p);
+    if(p.trial.eyelink.use)
+        p = pds.eyelink.finish(p);
+    end
+    
+    if(p.trial.plexon.spikeserver.use)
+        p = pds.plexon.finish(p);
+    end
+        
     if(p.defaultParameters.datapixx.use)
         %start adc data collection if requested
         pds.datapixx.adc.stop(p);
@@ -356,17 +375,18 @@ try
         
         levelsCondition=1:length(structs);
         levelsCondition(ismember(levelsCondition,levelsPreTrials))=[];
+        
         PDS.conditions=structs(levelsCondition);
         PDS.conditionNames=structNames(levelsCondition);
         PDS.data=p.data;
         PDS.functionHandles=p.functionHandles;
+        
         if p.defaultParameters.pldaps.save.v73
             save(fullfile(p.defaultParameters.session.dir, p.defaultParameters.session.file),'PDS','-mat','-v7.3')
         else
             save(fullfile(p.defaultParameters.session.dir, p.defaultParameters.session.file),'PDS','-mat')
         end
     end
-    
     
     if p.trial.display.movie.create
         Screen('FinalizeMovie', p.trial.display.movie.ptr);
