@@ -10,7 +10,7 @@ function p = run(p)
 % 04/2014 jk  moved into a pldaps class; adapted to new class structure
 %
 % modified by wolf zinke, Feb. 2017: cleaned for unused hardware options,
-%                                    change data file name definition
+%                                    move data file name definition to ND_InitSession
 %
 %TODO: 
 % one unified system for modules, e.g. moduleSetup, moduleUpdate, moduleClose
@@ -41,40 +41,7 @@ try
         end
         p.defaultParameters.session.experimentSetupFile = cfile;
     end
-    
-    % WZ: define output directory
-    p.defaultParameters.pldaps.dirs.data = fullfile(p.defaultParameters.pldaps.dirs.data, ...
-                                            p.defaultParameters.session.subject, ...
-                                            p.defaultParameters.session.experimentSetupFile, datestr(now,'yyyy_mm_dd'));
-   
-    if(~p.defaultParameters.pldaps.nosave)
         
-        p.defaultParameters.session.dir  = p.defaultParameters.pldaps.dirs.data;
-        
-        p.defaultParameters.session.file = [p.defaultParameters.session.subject, '_', datestr(p.defaultParameters.session.initTime, 'yyyymmdd'), ...
-                                           p.defaultParameters.session.experimentSetupFile, '_', datestr(p.defaultParameters.session.initTime, 'HHMM') '.pds'];
-        
-        %p.defaultParameters.session.file = [p.defaultParameters.session.subject datestr(p.defaultParameters.session.initTime, 'yyyymmdd') p.defaultParameters.session.experimentSetupFile datestr(p.defaultParameters.session.initTime, 'HHMM') '.PDS'];
-        %         p.defaultParameters.session.file = fullfile(p.defaultParameters.pldaps.dirs.data, [p.defaultParameters.session.subject datestr(p.defaultParameters.session.initTime, 'yyyymmdd') p.defaultParameters.session.experimentSetupFile datestr(p.defaultParameters.session.initTime, 'HHMM') '.PDS']);
-        
-        if p.defaultParameters.pldaps.useFileGUI
-            [cfile, cdir] = uiputfile('.pds', 'specify data storage file', fullfile( p.defaultParameters.session.dir,  p.defaultParameters.session.file));
-            if(isnumeric(cfile)) %got canceled
-                error('pldaps:run','file selection canceled. Not sure what the correct default bevaior would be, so stopping the experiment.')
-            end
-            p.defaultParameters.session.dir  = cdir;
-            p.defaultParameters.session.file = cfile;
-        end
-        
-        if ~exist(p.trial.session.dir, 'dir')
-            warning('pldaps:run','Data directory specified in .pldaps.dirs.data does not exist. Quitting PLDAPS. p.trial.pldaps.dirs.data=%s\nPlease create the directory along with a subdirectory called TEMP',p.trial.session.dir);
-            return;
-        end
-    else
-        p.defaultParameters.session.file='';
-        p.defaultParameters.session.dir='';
-    end
-    
     if p.trial.pldaps.useModularStateFunctions
         %experimentSetup before openScreen to allow modifiers
         [modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs] = getModules(p);
