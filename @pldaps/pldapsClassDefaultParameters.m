@@ -147,21 +147,21 @@ function s=pldapsClassDefaultParameters(s)
  s.	pldaps.	save.	v73 = 0;
 
 %s.	pldaps.	trialStates.
- s.	pldaps.	trialStates.	experimentAfterTrials = -7;
- s.	pldaps.	trialStates.	experimentCleanUp = -6;
- s.	pldaps.	trialStates.	experimentPostOpenScreen = -4;
- s.	pldaps.	trialStates.	experimentPreOpenScreen = -5;
- s.	pldaps.	trialStates.	frameDraw = 3;
- s.	pldaps.	trialStates.	frameDrawingFinished = 6;
- s.	pldaps.	trialStates.	frameDrawTimecritical = -Inf;
- s.	pldaps.	trialStates.	frameFlip = 8;
- s.	pldaps.	trialStates.	frameIdlePostDraw = -Inf;
- s.	pldaps.	trialStates.	frameIdlePreLastDraw = -Inf;
- s.	pldaps.	trialStates.	framePrepareDrawing = 2;
- s.	pldaps.	trialStates.	frameUpdate = 1;
- s.	pldaps.	trialStates.	trialCleanUpandSave = -3;
- s.	pldaps.	trialStates.	trialPrepare = -2;
- s.	pldaps.	trialStates.	trialSetup = -1;
+%   s.	pldaps.	trialStates.	experimentAfterTrials = -7;
+%   s.	pldaps.	trialStates.	experimentCleanUp = -6;
+%   s.	pldaps.	trialStates.	experimentPostOpenScreen = -4;
+%   s.	pldaps.	trialStates.	experimentPreOpenScreen = -5;
+%   s.	pldaps.	trialStates.	frameDraw = 3;
+%   s.	pldaps.	trialStates.	frameDrawingFinished = 6;
+%   s.	pldaps.	trialStates.	frameDrawTimecritical = -Inf;
+%   s.	pldaps.	trialStates.	frameFlip = 8;
+%   s.	pldaps.	trialStates.	frameIdlePostDraw = -Inf;
+%   s.	pldaps.	trialStates.	frameIdlePreLastDraw = -Inf;
+%   s.	pldaps.	trialStates.	framePrepareDrawing = 2;
+%   s.	pldaps.	trialStates.	frameUpdate = 1;
+%   s.	pldaps.	trialStates.	trialCleanUpandSave = -3;
+%   s.	pldaps.	trialStates.	trialPrepare = -2;
+%   s.	pldaps.	trialStates.	trialSetup = -1;
 
 %s.	plexon.
 %s.	plexon.	spikeserver.
