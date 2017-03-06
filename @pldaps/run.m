@@ -41,12 +41,6 @@ try
         end
         p.defaultParameters.session.experimentSetupFile = cfile;
     end
-        
-    if p.trial.pldaps.useModularStateFunctions
-        %experimentSetup before openScreen to allow modifiers
-        [modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs] = getModules(p);
-        runStateforModules(p,'experimentPreOpenScreen',modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
-    end
     
     %% Open PLDAPS windows
     % Open PsychToolbox Screen
@@ -56,14 +50,14 @@ try
     p.defaultParameters.pldaps.maxFrames = p.defaultParameters.pldaps.maxTrialLength * p.defaultParameters.display.frate;
     feval(p.defaultParameters.session.experimentSetupFile, p);
     
-    % Setup Photodiode stimuli
     %-------------------------------------------------------------------------%
+    %% Setup Photodiode stimuli
     if(p.trial.pldaps.draw.photodiode.use)
         makePhotodiodeRect(p);
     end
 
-    % Tick Marks
     %-------------------------------------------------------------------------%
+    %% Tick Marks
     if(p.trial.pldaps.draw.grid.use)
         p = initTicks(p);
     end
@@ -77,20 +71,14 @@ try
     end
     %things that where in the default Trial Structure
     
-    % Audio
     %-------------------------------------------------------------------------%
+    %% Audio
     if(p.trial.sound.use)
         p = pds.audio.setup(p);
     end
     
-    % PLEXON
     %-------------------------------------------------------------------------%
-    if(p.trial.plexon.spikeserver.use)
-        p = pds.plexon.spikeserver.connect(p);
-    end
-    
-    % REWARD
-    %-------------------------------------------------------------------------%
+    %% REWARD
     p = pds.behavior.reward.setup(p);
     
     % Initialize Datapixx including dual CLUTS and timestamp logging
@@ -106,11 +94,13 @@ try
         SetMouse(p.trial.mouse.initialCoordinates(1),p.trial.mouse.initialCoordinates(2),p.trial.mouse.windowPtr)
     end
     
-    if(p.trial.pldaps.useModularStateFunctions)
-        [modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs] = getModules(p);
-        runStateforModules(p,'experimentPostOpenScreen',modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
+    % --------------------------------------------------------------------%
+    %% prepare online plots
+    if(p.defaultParameters.plot.do_online)
+        p = feval(p.defaultParameters.plot.routine,  p);
     end
     
+    % --------------------------------------------------------------------%
     %% Last chance to check variables
     if(p.trial.pldaps.pause.type==1 && p.trial.pldaps.pause.preExperiment==true) %0=don't,1 is debugger, 2=pause loop
         p  %#ok<NOPRT>
@@ -181,6 +171,12 @@ try
             %a manual deep copy by saving the struct to a file and loading it
             %back in.
             tmpts = mergeToSingleStruct(p.defaultParameters);
+            
+            % quick and nasty fix to avoid saving of online plots
+            if(p.defaultParameters.plot.do_online)
+               tmpts.plot.fig = [];
+            end
+            
             save([p.trial.pldaps.dirs.data, filesep, 'TEMP', filesep, 'deepTrialStruct'], 'tmpts');
             clear tmpts
             load([p.trial.pldaps.dirs.data, filesep, 'TEMP', filesep, 'deepTrialStruct']);
@@ -193,10 +189,10 @@ try
             % run trial
             p = feval(p.trial.pldaps.trialMasterFunction,  p);
             
-            %unlock the defaultParameters
+            % unlock the defaultParameters
             p.defaultParameters.setLock(false);
             
-            %save tmp data
+            % save tmp data
             result = saveTempFile(p);
             if ~isempty(result)
                 disp(result.message)
@@ -211,58 +207,23 @@ try
             end
             p.data{trialNr}=dTrialStruct;
                        
-            if(p.trial.pldaps.useModularStateFunctions)
-                oldptrial = p.trial;
-                
-                [modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs] = getModules(p);
-                
-                p.defaultParameters.setLevels(levelsPreTrials);
-                p.defaultParameters.pldaps.iTrial=trialNr;
-                p.trial=mergeToSingleStruct(p.defaultParameters);
-                p.defaultParameters.setLock(true);
-                
-                runStateforModules(p,'experimentAfterTrials',modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
-                
-                p.defaultParameters.setLock(false);
-                betweenTrialsStruct = getDifferenceFromStruct(p.defaultParameters, p.trial);
-                
-                if(~isequal(struct,betweenTrialsStruct))
-                    p.defaultParameters.addLevels({betweenTrialsStruct}, {['experimentAfterTrials' num2str(trialNr) 'Parameters']});
-                    levelsPreTrials = [levelsPreTrials, length(p.defaultParameters.getAllLevels())]; %#ok<AGROW>
-                end
-                
-                p.trial=oldptrial;
-            end
             
-            if ~p.defaultParameters.datapixx.use && p.defaultParameters.display.useOverlay
+            if(~p.defaultParameters.datapixx.use && p.defaultParameters.display.useOverlay)
                 glDeleteTextures(2,glGenTextures(1));
             end
-            
-            %advance to next trial
-            %            if(dv.trial.pldaps.iTrial ~= dv.trial.pldaps.finish)
-            %                 %now we add this and the next Trials condition parameters
-            %                 dv.defaultParameters.addLevels(dv.conditions(trialNr), {['Trial' num2str(trialNr) 'Parameters']},[levelsPreTrials length(levelsPreTrials)+trialNr]);
-            %                 dv.defaultParameters.pldaps.iTrial=trialNr;
-            %                 dv.trial=mergeToSingleStruct(dv.defaultParameters);
-            %            else
-            %                 dv.trial.pldaps.iTrial=trialNr;
-            %            end
-            %
-            %            if isfield(dTrialStruct,'pldaps')
-            %                if isfield(dTrialStruct.pldaps,'finish')
-            %                     dv.trial.pldaps.finish=dTrialStruct.pldaps.finish;
-            %                end
-            %                if isfield(dTrialStruct.pldaps,'quit')
-            %                     dv.trial.pldaps.quit=dTrialStruct.pldaps.quit;
-            %                end
-            %            end
-            
+
+            %% make online plots
+            if(p.defaultParameters.plot.do_online)
+                feval(p.defaultParameters.plot.routine,  p);
+                p.trial.plot.fig = []; % avoid saving the figure to data
+            end
+
         else %dbquit ==1 is meant to be pause. should we halt eyelink, datapixx, etc?
 
             %create a new level to store all changes in,
             %load only non trial paraeters
-            pause=p.trial.pldaps.pause.type;
-            p.trial=p.defaultParameters;
+            pause = p.trial.pldaps.pause.type;
+            p.trial = p.defaultParameters;
             
             p.defaultParameters.addLevels({struct}, {['PauseAfterTrial' num2str(trialNr) 'Parameters']});
             p.defaultParameters.setLevels([levelsPreTrials length(p.defaultParameters.getAllLevels())]);
@@ -324,29 +285,25 @@ try
         % Close the audio device:
         PsychPortAudio('Close', p.defaultParameters.sound.master);
     end
-    
-    if p.trial.pldaps.useModularStateFunctions
-        [modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs] = getModules(p);
-        runStateforModules(p,'experimentCleanUp',modulesNames,moduleFunctionHandles,moduleRequestedStates,moduleLocationInputs);
-    end
-    
-    if ~p.defaultParameters.pldaps.nosave
+     
+    if(~p.defaultParameters.pldaps.nosave)
         [structs,structNames] = p.defaultParameters.getAllStructs();
         
-        PDS=struct;
-        PDS.initialParameters=structs(levelsPreTrials);
-        PDS.initialParameterNames=structNames(levelsPreTrials);
-        if p.defaultParameters.pldaps.save.initialParametersMerged
+        PDS = struct;
+        PDS.initialParameters     = structs(levelsPreTrials);
+        PDS.initialParameterNames = structNames(levelsPreTrials);
+        
+        if(p.defaultParameters.pldaps.save.initialParametersMerged)
             PDS.initialParametersMerged=mergeToSingleStruct(p.defaultParameters); %too redundant?
         end
         
-        levelsCondition=1:length(structs);
-        levelsCondition(ismember(levelsCondition,levelsPreTrials))=[];
+        levelsCondition = 1:length(structs);
+        levelsCondition(ismember(levelsCondition,levelsPreTrials)) = [];
         
-        PDS.conditions=structs(levelsCondition);
-        PDS.conditionNames=structNames(levelsCondition);
-        PDS.data=p.data;
-        PDS.functionHandles=p.functionHandles;
+        PDS.conditions = structs(levelsCondition);
+        PDS.conditionNames = structNames(levelsCondition);
+        PDS.data = p.data;
+        PDS.functionHandles = p.functionHandles;
         
         if p.defaultParameters.pldaps.save.v73
             save(fullfile(p.defaultParameters.session.dir, p.defaultParameters.session.file),'PDS','-mat','-v7.3')

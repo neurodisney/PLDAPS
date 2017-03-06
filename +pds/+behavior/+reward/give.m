@@ -10,21 +10,16 @@ function p = give(p, amount)
 
     % set default parameters
     if(nargin < 2)
-        amount = p.trial.behavior.reward.defaultAmount;
+        amount = p.trial.reward.defaultAmount;
     end
 
-    if(p.trial.datapixx.use && p.trial.datapixx.useForReward)
-        %% datapixx analog output is used
-        pds.datapixx.analogOut(amount, p.trial.datapixx.adc.RewardChannel, p.trial.datapixx.adc.TTLamp);
-    elseif(p.trial.newEraSyringePump.use)
-        %% Era Syringe Pump is used
-        pds.newEraSyringePump.give(p,amount);
-    end
+    %% datapixx analog output is used
+    pds.datapixx.analogOut(amount, p.trial.datapixx.adc.RewardChannel, p.trial.datapixx.adc.TTLamp);
 
    % send event code for reward    
    pds.tdt.strobe(p.trial.event.REWARD);
    
-    %%sound
+    %% sound
     if(p.trial.sound.use && p.trial.sound.useForReward)
         PsychPortAudio('Start', p.trial.sound.reward);
         pds.datapixx.flipBit(p.trial.event.AUDIO_REW);
