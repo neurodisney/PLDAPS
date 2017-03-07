@@ -262,14 +262,6 @@ try
     ListenChar(0);
     Priority(0);
     
-    if(p.trial.eyelink.use)
-        p = pds.eyelink.finish(p);
-    end
-    
-    if(p.trial.plexon.spikeserver.use)
-        p = pds.plexon.finish(p);
-    end
-        
     if(p.defaultParameters.datapixx.use)
         %start adc data collection if requested
         pds.datapixx.adc.stop(p);
@@ -280,12 +272,20 @@ try
         end
     end
     
+    % shut down audio
     if p.defaultParameters.sound.use
         pds.audio.clearBuffer(p);
         % Close the audio device:
         PsychPortAudio('Close', p.defaultParameters.sound.master);
     end
      
+    %% save online plot
+    if(p.defaultParameters.plot.do_online)
+        p.defaultParameters.plot.fig = []; % avoid saving the figure to data
+        hgexport(gcf, [p.defaultParameters.session.filestem, '.pdf'], hgexport('factorystyle'), 'Format', 'pdf');
+    end
+
+    %% save data as pds file
     if(~p.defaultParameters.pldaps.nosave)
         [structs,structNames] = p.defaultParameters.getAllStructs();
         
