@@ -152,9 +152,11 @@ try
         
         if(~p.trial.pldaps.quit)
             
-            %load parameters for next trial and lock defaultsParameters
+            % ----------------------------------------------------------------%
+            %load parameters for next tria
             trialNr = trialNr+1;
-            
+
+            % get information for current condition
             if(~isempty(p.conditions))
                 p.defaultParameters.addLevels(p.conditions(trialNr), {['Trial', num2str(trialNr), 'Parameters']});
                 p.defaultParameters.setLevels([levelsPreTrials, length(levelsPreTrials)+trialNr]);
@@ -163,27 +165,59 @@ try
             end
             
             p.defaultParameters.pldaps.iTrial = trialNr;
-            
+
+            %% update trial information
+            % Todo: Maybe create a trial update function for easier control
+            if(trialNr > 1)
+                % The old trial struct is still in memory
+                if(p.trial.outcome.CurrOutcome == p.trial.outcome.Correct)
+                    p.defaultParameters.LastHits = p.defaultParameters.LastHits + 1;     % how many correct trials since last error
+                    p.defaultParameters.NHits    = p.defaultParameters.NHits + 1;        % how many correct trials in total
+                else
+                    p.defaultParameters.LastHits = 0;     % how many correct trials since last error
+
+                    if(p.trial.outcome.CurrOutcome ~= p.trial.outcome.NoStart && ...
+                        p.trial.outcome.CurrOutcome ~= p.trial.outcome.PrematStart)
+                        p.defaultParameters.NCompleted = p.defaultParameters.NCompleted + 1; % number of started trials (excluding not started trials)
+                    end
+                end
+
+                p.defaultParameters.blocks = p.trial.blocks;
+
+                % Define a set of variables that should be editable, i.e. pass on information by default
+                if(p.trial.datapixx.useJoystick)
+                    p.defaultParameters.behavior.joystick.Zero = p.trial.behavior.joystick.Zero;
+                end
+
+                if(p.trial.datapixx.useAsEyepos
+                    p.defaultParameters.behavior.fixation.Zero = p.trial.behavior.fixation.Zero;
+                end
+            end
+
+            % ----------------------------------------------------------------%
+            %% create new trial struct
+            % create temporary trial struct
+            tmpts = mergeToSingleStruct(p.defaultParameters);
+
+            % quick and nasty fix to avoid saving of online plots
+            if(p.defaultParameters.plot.do_online)
+               tmpts.plot.fig = [];
+            end
+
             %it looks like the trial struct gets really partitioned in
             %memory and this appears to make some get (!) calls slow.
             %We thus need a deep copy. The superclass matlab.mixin.Copyable
             %is supposed to do that, but that is very slow, so we create
             %a manual deep copy by saving the struct to a file and loading it
             %back in.
-            tmpts = mergeToSingleStruct(p.defaultParameters);
-            
-            % quick and nasty fix to avoid saving of online plots
-            if(p.defaultParameters.plot.do_online)
-               tmpts.plot.fig = [];
-            end
-            
             save([p.trial.pldaps.dirs.data, filesep, 'TEMP', filesep, 'deepTrialStruct'], 'tmpts');
             clear tmpts
             load([p.trial.pldaps.dirs.data, filesep, 'TEMP', filesep, 'deepTrialStruct']);
             p.trial = tmpts;
             clear tmpts;
-            %             p.trial=mergeToSingleStruct(p.defaultParameters);
-            
+
+            % ----------------------------------------------------------------%
+            %% lock defaultsParameters and run current trial
             p.defaultParameters.setLock(true);
             
             % run trial
@@ -192,6 +226,8 @@ try
             % unlock the defaultParameters
             p.defaultParameters.setLock(false);
             
+            % ----------------------------------------------------------------%
+            %% complete trial: plot and save data
             % save tmp data
             result = saveTempFile(p);
             if ~isempty(result)
